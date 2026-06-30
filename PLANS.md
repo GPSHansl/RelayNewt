@@ -1,4 +1,4 @@
-# MailNewt - Postfix Relay
+# relaynewt - Postfix Relay
 Development Roadmap
 
 This document contains ideas, improvements and future features that are

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Postfix Relay
+# relaynewt Postfix Relay
 # Version 1.0
 #
 
@@ -9,7 +9,7 @@ set -euo pipefail
 CONFIG_DIR="/config"
 POSTFIX_DIR="/etc/postfix"
 
-echo "=== mailnewt Postfix Relay ==="
+echo "=== relaynewt Postfix Relay ==="
 echo
 
 #
