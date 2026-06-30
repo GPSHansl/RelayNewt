@@ -1,0 +1,21 @@
+#
+# Postfix Relay
+# Version 1.0
+#
+
+services:
+  postfix:
+    image: postfix-relay:1.0
+    build:
+      context: .
+    container_name: postfix-relay
+    hostname: smtp.your.dockerhost.local
+    restart: unless-stopped
+    ports:
+      - "587:587"
+    environment:
+      TZ: Europe/Berlin
+    volumes:
+      # Project configuration
+      - ./config:/config:ro
+

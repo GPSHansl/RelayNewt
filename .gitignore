@@ -1,0 +1,29 @@
+# Secrets
+config/secrets/*.pass
+config/secrets/*.pass.example~
+
+# Identity configuration
+config/identities/*.conf
+
+# Keep directory structure
+!config/secrets/.gitkeep
+!config/secrets/README.md
+!config/identities/.gitkeep
+!config/identities/README.md
+!config/identities/*.conf.example
+
+# Postfix generated files
+*.db
+sender_relay
+sender_access
+sasl_passwd
+
+# macOS / Linux
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Logs
+*.log

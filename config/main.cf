@@ -1,0 +1,38 @@
+compatibility_level = 3.6
+
+myhostname = relay.fritz.box
+myorigin = fritz.box
+
+inet_interfaces = all
+inet_protocols = ipv4
+
+mydestination =
+
+relay_domains =
+
+local_transport = error:local delivery disabled
+
+mynetworks = 192.168.0.0/16 127.0.0.0/8
+
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    reject_unauth_destination
+
+smtp_sender_dependent_authentication = yes
+
+sender_dependent_relayhost_maps = hash:/config/sender_relay
+
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/config/sasl_passwd
+smtp_sasl_security_options = noanonymous
+
+smtp_tls_security_level = encrypt
+smtp_use_tls = yes
+
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+
+alias_maps =
+alias_database =
+
+mailbox_transport =
+virtual_transport =
