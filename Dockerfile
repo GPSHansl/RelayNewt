@@ -1,5 +1,5 @@
 #
-# Postfix Relay
+# mailnewt Postfix Relay
 # Version 1.0
 #
 

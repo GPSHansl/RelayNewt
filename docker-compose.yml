@@ -5,10 +5,10 @@
 
 services:
   postfix:
-    image: postfix-relay:1.0
+    image: mailnewt:1.0
     build:
       context: .
-    container_name: postfix-relay
+    container_name: mailnewt
     hostname: smtp.your.dockerhost.local
     restart: unless-stopped
     ports:

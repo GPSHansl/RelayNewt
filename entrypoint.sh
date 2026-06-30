@@ -9,7 +9,7 @@ set -euo pipefail
 CONFIG_DIR="/config"
 POSTFIX_DIR="/etc/postfix"
 
-echo "=== Postfix Relay ==="
+echo "=== mailnewt Postfix Relay ==="
 echo
 
 #

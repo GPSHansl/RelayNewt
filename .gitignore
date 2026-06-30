@@ -1,9 +1,8 @@
 # Secrets
-config/secrets/*.pass
-config/secrets/*.pass.example~
+config/secrets/*.pass*
 
 # Identity configuration
-config/identities/*.conf
+config/identities/*.conf*
 
 # Keep directory structure
 !config/secrets/.gitkeep
