@@ -40,16 +40,34 @@ do
     RELAY=""
     PORT=""
     USERNAME=""
-    PASSWORD_FILE=""
+    PASSWORD=""
 
-    while IFS='=' read -r key value
+    while IFS='=' read -r key value || [[ -n "$key" ]]
     do
 
-        key="$(echo "$key" | xargs)"
-        value="$(echo "$value" | xargs)"
+        #
+        # Remove any Windows/Mac line endings.
+        # Supports LF, CRLF, CR and even malformed LFCR files.
+        #
+
+        key="${key//$'\r'/}"
+        key="${key//$'\n'/}"
+
+        value="${value//$'\r'/}"
+        value="${value//$'\n'/}"
+
+        #
+        # Trim leading and trailing whitespace.
+        #
+
+        key="${key#"${key%%[![:space:]]*}"}"
+        key="${key%"${key##*[![:space:]]}"}"
+
+        value="${value#"${value%%[![:space:]]*}"}"
+        value="${value%"${value##*[![:space:]]}"}"
 
         [[ -z "$key" ]] && continue
-        [[ "$key" =~ ^# ]] && continue
+        [[ "$key" == \#* ]] && continue
 
         case "$key" in
 
@@ -69,8 +87,8 @@ do
                 USERNAME="$value"
                 ;;
 
-            PASSWORD_FILE)
-                PASSWORD_FILE="$value"
+            PASSWORD)
+                PASSWORD="$value"
                 ;;
 
         esac
@@ -85,14 +103,7 @@ do
     [[ -n "$RELAY" ]] || { echo "Missing RELAY in $file"; exit 1; }
     [[ -n "$PORT" ]] || { echo "Missing PORT in $file"; exit 1; }
     [[ -n "$USERNAME" ]] || { echo "Missing USERNAME in $file"; exit 1; }
-    [[ -n "$PASSWORD_FILE" ]] || { echo "Missing PASSWORD_FILE in $file"; exit 1; }
-
-    [[ -f "$PASSWORD_FILE" ]] || {
-        echo "Password file not found: $PASSWORD_FILE"
-        exit 1
-    }
-
-    PASSWORD="$(<"$PASSWORD_FILE")"
+    [[ -n "$PASSWORD" ]] || { echo "Missing PASSWORD in $file"; exit 1; }
 
     #
     # One SASL entry per relay
@@ -166,4 +177,3 @@ echo "Generated:"
 echo "  sender_relay"
 echo "  sender_access"
 echo "  sasl_passwd"
-echo

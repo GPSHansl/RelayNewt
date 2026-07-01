@@ -1,38 +1,78 @@
+#
+# RelayNewt - Postfix Relay Configuration
+# Version 1.0 (docker-safe + stdout logging)
+#
+
 compatibility_level = 3.6
 
-myhostname = relay.fritz.box
-myorigin = fritz.box
+# ============================================================
+# BASIC IDENTITY
+# ============================================================
+
+myhostname = smtp.relaynewt.lan
+myorigin = relaynewt.lan
+
+# ============================================================
+# NETWORK
+# ============================================================
 
 inet_interfaces = all
 inet_protocols = ipv4
+smtp_address_preference = ipv4
+
+mynetworks = 0.0.0.0/0
+
+# ============================================================
+# NO LOCAL DELIVERY (relay-only design)
+# ============================================================
 
 mydestination =
-
 relay_domains =
 
 local_transport = error:local delivery disabled
+virtual_transport = error:virtual delivery disabled
 
-mynetworks = 192.168.0.0/16 127.0.0.0/8
+# ============================================================
+# SMTPD POLICY (incoming clients)
+# ============================================================
 
 smtpd_recipient_restrictions =
     permit_mynetworks,
     reject_unauth_destination
 
+# ============================================================
+# SENDER-BASED ROUTING (core feature)
+# ============================================================
+
+sender_dependent_relayhost_maps = hash:/etc/postfix/sender_relay
+
+# ============================================================
+# AUTHENTICATION (to upstream SMTP providers)
+# ============================================================
+
 smtp_sender_dependent_authentication = yes
 
-sender_dependent_relayhost_maps = hash:/config/sender_relay
-
 smtp_sasl_auth_enable = yes
-smtp_sasl_password_maps = hash:/config/sasl_passwd
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
 smtp_sasl_security_options = noanonymous
 
-smtp_tls_security_level = encrypt
-smtp_use_tls = yes
+# ============================================================
+# TLS (outbound only)
+# ============================================================
 
+smtp_tls_security_level = may
+smtp_use_tls = yes
 smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+
+# ============================================================
+# DISABLE LOCAL ALIASES (IMPORTANT FIX)
+# ============================================================
 
 alias_maps =
 alias_database =
 
-mailbox_transport =
-virtual_transport =
+# ============================================================
+# DOCKER LOGGING (IMPORTANT)
+# ============================================================
+
+maillog_file = /dev/stdout

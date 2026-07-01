@@ -13,28 +13,34 @@ echo "=== relaynewt Postfix Relay ==="
 echo
 
 #
-# Check configuration
+# Required files (list-based validation)
 #
 
-[[ -f "${CONFIG_DIR}/main.cf" ]] || {
-    echo "ERROR: ${CONFIG_DIR}/main.cf not found."
-    exit 1
-}
+REQUIRED_FILES=(
+    "${CONFIG_DIR}/main.cf"
+    "${CONFIG_DIR}/master.cf"
+    "${CONFIG_DIR}/build_maps.sh"
+)
 
-[[ -f "${CONFIG_DIR}/build_maps.sh" ]] || {
-    echo "ERROR: ${CONFIG_DIR}/build_maps.sh not found."
-    exit 1
-}
+REQUIRED_DIRS=(
+    "${CONFIG_DIR}/identities"
+)
 
-[[ -d "${CONFIG_DIR}/identities" ]] || {
-    echo "ERROR: ${CONFIG_DIR}/identities not found."
-    exit 1
-}
+echo "Checking configuration..."
 
-[[ -d "${CONFIG_DIR}/secrets" ]] || {
-    echo "ERROR: ${CONFIG_DIR}/secrets not found."
-    exit 1
-}
+for file in "${REQUIRED_FILES[@]}"; do
+    [[ -f "$file" ]] || {
+        echo "ERROR: required file missing: $file"
+        exit 1
+    }
+done
+
+for dir in "${REQUIRED_DIRS[@]}"; do
+    [[ -d "$dir" ]] || {
+        echo "ERROR: required directory missing: $dir"
+        exit 1
+    }
+done
 
 #
 # Install configuration
@@ -43,8 +49,28 @@ echo
 echo "Installing configuration..."
 
 cp "${CONFIG_DIR}/main.cf" "${POSTFIX_DIR}/main.cf"
+cp "${CONFIG_DIR}/master.cf" "${POSTFIX_DIR}/master.cf"
 
 chmod 644 "${POSTFIX_DIR}/main.cf"
+chmod 644 "${POSTFIX_DIR}/master.cf"
+
+#
+# Prepare Postfix chroot environment
+#
+
+mkdir -p /var/spool/postfix/etc
+
+POSTFIX_CHROOT_FILES=(
+    /etc/resolv.conf
+    /etc/hosts
+    /etc/services
+)
+
+for file in "${POSTFIX_CHROOT_FILES[@]}"
+do
+    [[ -f "$file" ]] || continue
+    cp -f "$file" "/var/spool/postfix${file}"
+done
 
 #
 # Generate lookup tables
@@ -55,19 +81,28 @@ echo "Generating lookup tables..."
 bash "${CONFIG_DIR}/build_maps.sh"
 
 #
+# Ensure Postfix runtime environment is valid
+#
+
+postfix set-permissions >/dev/null 2>&1 || true
+
+#
 # Validate configuration
 #
 
 echo "Running postfix check..."
 
-postfix check
+if ! postfix check; then
+    echo "ERROR: Postfix configuration invalid."
+    exit 1
+fi
 
 echo
 echo "Configuration OK."
 echo
 
 #
-# Start Postfix
+# Start Postfix in foreground (Docker-safe)
 #
 
-exec postfix start-fg
+exec /usr/sbin/postfix start-fg

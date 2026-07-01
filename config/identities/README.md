@@ -9,7 +9,7 @@ FROM=prename.surname@gmail.com,prename.surname@googlemail.com
 RELAY=smtp.gmail.com
 PORT=587
 
-USERNAME=prename.surname@googlemail.com
-PASSWORD_FILE=/etc/postfix/secrets/gmail.pass
+USERNAME=firstname.surname@googlemail.com
+PASSWORD=xxxxxxxxx
 ```
 
