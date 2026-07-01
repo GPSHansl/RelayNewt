@@ -1,9 +1,9 @@
-# relaynewt - Postfix Relay
+# <img src="relaynewt.png" style="width:50px;"/>&nbsp;relaynewt - Postfix Relay
 Version 1.0
+
 
 A minimal Postfix SMTP relay for home networks.
 
-![relaynewt Logo](relaynewt.png)
 
 The relay accepts mail only from trusted local clients and routes outgoing
 messages to different SMTP providers based on the sender address.
