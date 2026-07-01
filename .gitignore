@@ -1,15 +1,14 @@
-# Secrets
-config/secrets/*.pass*
-
 # Identity configuration
 config/identities/*.conf*
 
 # Keep directory structure
-!config/secrets/.gitkeep
-!config/secrets/README.md
 !config/identities/.gitkeep
 !config/identities/README.md
 !config/identities/*.conf.example
+
+# Test configuration files
+test/*.json
+!test/*.json.example
 
 # Postfix generated files
 *.db

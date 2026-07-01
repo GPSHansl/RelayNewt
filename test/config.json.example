@@ -1,0 +1,17 @@
+{
+  "SMTPHost": "127.0.0.1",
+  "SMTPPort": 587,
+  "Recipients": [
+    {
+      "Name": "sender legal",
+      "From": "firstname.lastname@gmx.de",
+      "To": "firstname.lastname@gmail.com"
+    },
+    {
+      "Name": "sender illegal",
+      "From": "lastname@gmx.de",
+      "To": "firstname.lastname@gmail.com",
+      "ExpectSuccess": false
+    }
+  ]
+}
