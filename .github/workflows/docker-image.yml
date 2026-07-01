@@ -26,11 +26,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercase owner
+        run: echo "OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/relaynewt:latest
-            ghcr.io/${{ github.repository_owner }}/relaynewt:${{ github.sha }}
+            ghcr.io/${{ env.OWNER }}/relaynewt:latest
+            ghcr.io/${{ env.OWNER }}/relaynewt:${{ github.sha }}
