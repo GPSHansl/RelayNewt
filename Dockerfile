@@ -19,17 +19,14 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 #
-# Install entrypoint
+# Install files
 #
-
-COPY entrypoint.sh /entrypoint.sh
-
-RUN chmod 755 /entrypoint.sh
+COPY --chmod=755 assets/entrypoint.sh assets/build_maps.sh /
+COPY --chmod=644 assets/postfix/main.cf assets/postfix/master.cf /etc/postfix/
 
 #
 # SMTP Submission
 #
-
 EXPOSE 587
 
 ENTRYPOINT ["/entrypoint.sh"]
