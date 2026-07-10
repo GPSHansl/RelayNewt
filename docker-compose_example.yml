@@ -1,11 +1,10 @@
 #
 # Postfix Relay
-# Version 1.0
 #
 
 services:
   postfix:
-    image: relaynewt:1.0
+    image: relaynewt:latest
     build:
       context: .
     container_name: relaynewt
