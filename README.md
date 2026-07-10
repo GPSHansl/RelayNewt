@@ -1,336 +1,136 @@
-# <img src="relaynewt.png" style="width:50px;"/>&nbsp;relaynewt - Postfix Relay
-Version 1.0
+# relaynewt - Postfix Relay
 
+relaynewt is a minimal Postfix SMTP relay for home networks and small internal setups. It accepts mail from trusted local clients and routes outgoing messages to different SMTP providers based on the sender address.
 
-A minimal Postfix SMTP relay for home networks.
+Typical mappings look like this:
 
+- `firstname.lastname@gmail.com` -> `smtp.gmail.com`
+- `firstname.lastname@googlemail.com` -> `smtp.gmail.com`
+- `firstname.lastname@gmx.de` -> `mail.gmx.net`
+- `anything@yourdomain.com` -> your domain provider
 
-The relay accepts mail only from trusted local clients and routes outgoing
-messages to different SMTP providers based on the sender address.
+No local mailboxes are created, no mail is received from the Internet, and no MX records are required.
 
-Typical use case:
-
-- firstname.lastname@gmail.com      → smtp.gmail.com
-- firstname.lastname@googlemail.com → smtp.gmail.com
-- firstname.lastname@gmx.de         → mail.gmx.net
-- anything@yourdomain.com           → your domain provider
-
-No local mailboxes are created.
-
-No mail is received from the Internet.
-
-No MX records are required.
-
----
-
-# Features
+## Features
 
 - Relay-only SMTP server
 - Sender-dependent relayhost selection
 - Multiple SMTP providers
 - Multiple sender addresses per identity
-- Domain wildcard support (e.g. @yourdomain.com)
-- Passwords stored separately from configuration
+- Domain wildcard support, for example `@yourdomain.com`
+- Configuration stored in plain text identity files
 - Docker Compose based deployment
-- Debian Bookworm
-- Uses the standard Debian Postfix package
+- Debian Bookworm base image
 
----
+## Project Layout
 
-# Architecture
-
-```
-                     +-------------------+
-                     | Thunderbird       |
-                     +-------------------+
-                               |
-                               |
-                               | SMTP
-                               |
-                               ▼
-                     +-------------------+
-                     | Postfix Relay     |
-                     +-------------------+
-                        │
-        ┌───────────────┼───────────────────┐
-        │               │                   │
-        ▼               ▼                   ▼
-
- smtp.gmail.com   mail.gmx.net    smtp.provider.example
+```text
+.
+├── Dockerfile
+├── docker-compose_example.yml
+├── LICENSE
+├── PLANS.md
+├── README.md
+├── assets/
+│   ├── build_maps.sh
+│   ├── entrypoint.sh
+│   └── postfix/
+│       ├── main.cf
+│       └── master.cf
+├── config/
+│   └── identities/
+│       └── README.md
+└── test/
+    ├── config.json.example
+    └── test-relaynewt.ps1
 ```
 
-Thunderbird only knows a single SMTP server.
-
-The relay decides which upstream SMTP server to use.
-
----
-
-# Requirements
+## Requirements
 
 - Docker
 - Docker Compose
 - Internet access
 
----
+## Quick Start
 
-# Project structure
-
-```
-postfix-relay/
-
-├── Dockerfile
-├── docker-compose.yml
-├── entrypoint.sh
-│
-└── config/
-    │
-    ├── main.cf
-    ├── build_maps.sh
-    │
-    ├── identities/
-    │     ├── gmail.conf
-    │     ├── gmx.conf
-    │     └── yourdomain.conf
-    │
-    └── secrets/
-          ├── gmail.pass
-          ├── gmx.pass
-          └── yourdomain.pass
-```
-
----
-
-# Installation
-
-Clone the repository.
-
-Build the image.
+1. Review the identity files in `config/identities/` and adjust them for your providers.
+2. Build the image.
 
 ```bash
-docker compose build
+docker compose -f docker-compose_example.yml build
 ```
 
-Start the relay.
+3. Start the relay.
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose_example.yml up -d
 ```
 
-Check container status.
+4. Check the container status.
 
 ```bash
-docker compose ps
+docker compose -f docker-compose_example.yml ps
 ```
 
-Follow the logs.
+5. Follow the logs.
 
 ```bash
-docker compose logs -f
+docker compose -f docker-compose_example.yml logs -f
 ```
 
-Stop the relay.
+6. Stop the relay.
 
 ```bash
-docker compose down
+docker compose -f docker-compose_example.yml down
 ```
 
----
+## Configuration
 
-# Configuration
-
-Every SMTP provider has one configuration file inside
-
-```
-config/identities/
-```
+Each SMTP provider is defined by one file in `config/identities/`. The runtime reads that directory and generates the Postfix lookup tables during container startup.
 
 Example:
 
-```
-gmail.conf
-```
-
 ```properties
 FROM=firstname.lastname@gmail.com,firstname.lastname@googlemail.com
-
 RELAY=smtp.gmail.com
 PORT=587
 
-USERNAME=firstname.lastname@gmail.com
-
-PASSWORD_FILE=/config/secrets/gmail.pass
+USERNAME=firstname.lastname@googlemail.com
+PASSWORD=your-app-password
 ```
 
-Passwords are stored separately.
+Supported fields:
 
-Example
+- `FROM`: one sender address or a comma-separated list of sender addresses
+- `RELAY`: upstream SMTP host
+- `PORT`: upstream SMTP port, usually `587`
+- `USERNAME`: login name for the upstream SMTP server
+- `PASSWORD`: password or app password for the upstream SMTP server
 
-```
-config/secrets/gmail.pass
-```
-
-```
-YOUR_GOOGLE_APP_PASSWORD
-```
-
----
-
-# Domain wildcard
-
-If a complete domain shall use the same SMTP provider:
+Domain wildcards are supported by prefixing the domain with `@`:
 
 ```properties
 FROM=@yourdomain.com
 ```
 
-Every sender address belonging to this domain will use the configured relay.
+That entry matches every sender address ending in `@yourdomain.com`.
 
-Examples:
+To add another provider, create a new `.conf` file in `config/identities/`, fill in the fields above, and restart the container.
 
-```
-mail@yourdomain.com
+## Testing
 
-support@yourdomain.com
+The `test/` folder contains a small PowerShell-based SMTP test client.
 
-firstname.lastname@yourdomain.com
-```
+Copy `test/test-relaynewt-config.json.example` to `test/test-relaynewt-config.json`, adjust the host, port, and sender/recipient pairs, then run:
 
----
-
-# Multiple sender addresses
-
-Multiple sender addresses can be configured.
-
-Example
-
-```properties
-FROM=firstname.lastname@gmail.com,firstname.lastname@googlemail.com
+```powershell
+.\test\test-relaynewt.ps1
 ```
 
----
+The script expects the relay to be reachable on the configured SMTP host and port.
 
-# Adding another provider
+## Notes
 
-Create
-
-```
-config/identities/provider.conf
-```
-
-Create its password
-
-```
-config/secrets/provider.pass
-```
-
-Restart the relay.
-
-```bash
-docker compose restart
-```
-
-Done.
-
----
-
-# Thunderbird configuration
-
-Every Thunderbird account uses the same SMTP server.
-
-Server
-
-```
-smtp.your.dockerhost.local
-```
-
-Port
-
-```
-587
-```
-
-The relay automatically chooses the correct upstream SMTP server.
-
----
-
-# Security
-
-Version 1.0 intentionally keeps the relay simple.
-
-Implemented:
-
-- relay only
-- no local mailboxes
-- no MX support
-- sender whitelist
-- sender dependent routing
-- local network access only
-
-Not implemented:
-
-- SMTP AUTH for clients
-- TLS between Thunderbird and relay
-- Docker secrets
-- DKIM signing
-
-These features are planned for Version 1.1.
-
----
-
-# Logs
-
-Show logs
-
-```bash
-docker compose logs -f
-```
-
----
-
-# Testing
-
-Example
-
-Send a mail using
-
-```
-firstname.lastname@gmail.com
-```
-
-The log should show
-
-```
-relay=smtp.gmail.com
-```
-
-Then send another mail using
-
-```
-firstname.lastname@gmx.de
-```
-
-The log should show
-
-```
-relay=mail.gmx.net
-```
-
-Finally send
-
-```
-support@yourdomain.com
-```
-
-The configured SMTP server for
-
-```
-@yourdomain.com
-```
-
-should be used.
-
----
-
-# Version
-
-Version 1.0
+- The container exposes SMTP submission on port `587`.
+- Postfix is configured from the files in `assets/postfix/`.
+- `assets/entrypoint.sh` validates the configuration and generates the lookup tables at startup.

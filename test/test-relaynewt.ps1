@@ -1,8 +1,8 @@
 # ------------------------------------------------------------
 # SMTP Test Sender
-# Reads all settings from config.json
+# Reads all settings from test-relaynewt-config.json
 #
-# Example config.json:
+# Example test-relaynewt-config.json:
 #
 # {
 #   "SMTPHost": "127.0.0.1",
@@ -24,7 +24,7 @@
 # }
 # ------------------------------------------------------------
 
-$configFile = Join-Path $PSScriptRoot "config.json"
+$configFile = Join-Path $PSScriptRoot "test-relaynewt-config.json"
 
 if (!(Test-Path $configFile)) {
     Write-Error "Konfigurationsdatei '$configFile' nicht gefunden."
