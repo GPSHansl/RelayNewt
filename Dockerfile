@@ -1,6 +1,5 @@
 #
 # relaynewt Postfix Relay
-# Version 1.0
 #
 
 FROM debian:bookworm-slim
