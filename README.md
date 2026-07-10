@@ -84,6 +84,32 @@ docker compose -f docker-compose_example.yml logs -f
 docker compose -f docker-compose_example.yml down
 ```
 
+## Pull from GitHub Container Registry (GHCR)
+
+If you publish this image via GitHub Actions, you can pull it directly from GHCR.
+
+Package URL:
+
+- https://github.com/GPSHansl/relaynewt/pkgs/container/relaynewt
+
+Pull command:
+
+```bash
+docker pull ghcr.io/gpshansl/relaynewt:latest
+```
+
+Use it in Compose by setting the service image to:
+
+```yaml
+image: ghcr.io/gpshansl/relaynewt:latest
+```
+
+If the package is private, authenticate first:
+
+```bash
+echo <YOUR_GITHUB_TOKEN> | docker login ghcr.io -u <YOUR_GITHUB_USERNAME> --password-stdin
+```
+
 ## Configuration
 
 Each SMTP provider is defined by one file in `config/identities/`. The runtime reads that directory and generates the Postfix lookup tables during container startup.
